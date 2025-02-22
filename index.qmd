@@ -1,7 +1,9 @@
 ---
 title: "Data Science for Public Policy"
 subtitle: "Assignment 04"
-author: "Troy Cheng - yc1317 Caroline Atuhaire ca975"
+author:  
+  - name: "Troy Cheng yc1317"
+  - name: "Caroline Atuhaire ca975"
 execute:
   warning: false
 format:
