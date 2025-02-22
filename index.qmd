@@ -11,9 +11,20 @@ format:
     embed-resources: true
 ---
 
+
+# Set upp for the Assignment04
+```{r}
+library(tidyverse)
+library(haven)
+
+data <- read_stata()
+
+
+```
+
 ## Quarto
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+Quarto enable you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
 
 ## Running Code
 
