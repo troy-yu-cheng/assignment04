@@ -30,9 +30,15 @@ You can add options to executable code like this
 
 The `echo: false` option disables the printing of code (only output is displayed).
 ```{r}
+<<<<<<< HEAD
 2 +2
 3 * 3
 
 library(haven)
 library(tidyverse)
 ```
+=======
+library(tidyverse)
+library(dplyr)
+```
+>>>>>>> 1f465f6be4a7d2394a3c4d98244743f8084d7887
