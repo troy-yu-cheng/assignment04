@@ -4,7 +4,7 @@
 
 ## Data Set Description
 
-The data we collect is from a publicly accessible data set of [World Bank called World Development Indicators](https://databank.worldbank.org/source/world-development-indicators). We are looking into the relationships of variables related to economic or education policy, conducting data analysis and visualization in [RStudio](https://posit.co/download/rstudio-desktop/).
+The data we collect is from a publicly accessible data set of World Bank called [World Development Indicators](https://databank.worldbank.org/source/world-development-indicators). We are looking into the relationships of variables related to economic or education policy, conducting data analysis and visualization in [RStudio](https://posit.co/download/rstudio-desktop/).
 
 [World Development Indicators (WDI)](https://datatopics.worldbank.org/world-development-indicators/) is the primary World Bank collection of development indicators, compiled from officially recognized international sources. It is a compilation of relevant, high-quality, and internationally comparable statistics about global development and the fight against poverty, presenting the most current and accurate global development data available, and includes national, regional and global estimates. The database contains 1,400 time series indicators for 217 economies and more than 40 country groups, with data for many indicators going back more than 50 years.
 
@@ -23,7 +23,7 @@ The way how we selected original variables and download them from the world bank
 	- Series: open the filter tab on the top right of the console. Select *Growth Rates*, *Aggregate indicators*, and *Expenditure on GDP* in **Economic Policy & Debt** section. Scroll down and select all four boxes (*Efficiency*, *Inputs*, *Outcomes* and *Participation*) in **Education** section. Then scroll down to the bottom and select *Economic activity*, *Labor force structure*, and *Unemployment* in **Social Protection & Labor** section. Now you should see the amount of all available variables is 320 on the top right of the console. Then close the filter feature and select all 320 variables.
 	- Time: select year 2001-2023. 23 variables in total.
 	- Metadata Attributes: leave it as default (it should check all the boxes).
-3. Download the data though the **Download options** tab on the top right of the whole page. Download the data as an Excel file. Also, download the Metadata though the same tab (you can set Metadata as Excel file though **Download options** → **Advanced options**).
+3. Download the data though the **Download options** tab on the top right of the whole page. Download the data as an Excel file. Also, download the Metadata though the same tab (you can set Metadata as Excel file though **Download options** → **Advanced options**). The Metadata for this project is saved as *2_Metadata_World_Development_Indicators.xlsx* in [data](https://github.com/troy-yu-cheng/assignment04/blob/main/data) folder.
 4. Rename the file with any name you want on your local machine (here we do *0_OriginData_World_Development_Indicators.xlsx*).
 
 ## Transfer the Data Format and Clean Data
