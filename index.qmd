@@ -101,8 +101,7 @@ The scatter plot shows the relationship between manufacturing employment (%) and
 ```{r}
 ggplot(data_available_clean, aes(x = year, y = unemp_youth_total_milo, fill = country_name)) +
   geom_col() +
-  # scale_fill_manual(values = c("China" = "blue", "United States" = "red", "Uganda" = "green")) +
-  # coord_flip() +
+  scale_fill_manual(values = c("China" = "red", "United States" = "blue", "Uganda" = "green")) +
   labs(title = "Industrial Employment vs. Youth Unemployment",
        subtitle = "Comparison of China, US, and Uganda",
        x = "Country", 
