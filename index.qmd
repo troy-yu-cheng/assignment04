@@ -1,17 +1,27 @@
 ---
 title: "Data Science for Public Policy"
 subtitle: "Assignment 04"
-author: "Troy Cheng - yc1317; Caroline Atuhaire - ca975"
+author: 
+  - name: "Troy Cheng - yc1317, Caroline Atuhaire - ca975"
+    email: yc1317@georgetown.edu
+    affiliation: Georgetown University
+    corresponding: true
 execute:
   warning: false
+df-print: kable
+title-block-banner: "#E69F0095"
+title-block-banner-color: "white"
 format:
   html:
     embed-resources: true
     toc: true
     toc-location: left
 ---
+# 01 Data Source
 
-# Set Up Packages
+[World Development Indicators](https://databank.worldbank.org/source/world-development-indicators) from World Bank
+
+# 02 Set Up Packages
 
 ```{r}
 # install.packages(c("readxl", "writexl")
@@ -19,11 +29,136 @@ format:
 library(readxl)
 library(writexl)
 library(tidyverse)
-library(tibble)
 
 ```
 
-# Transfer the Data Format
+As the process of data cleaning is too complicated, we made it as an appendix. You can follow the code in **Appendix** and reproduce the cleaned data set we use here.
+
+# 03 Research Question
+
+Industrialization is a key indicator of a country's development level. The differences of the industrialization level in different countries intrigue the question: how does the **employment rate in the industrial sector**, *which includes mining and quarrying, manufacturing, construction, and public utilities (electricity, gas, and water)*, relate to the **industrial structure** (agriculture and services), **youth unemployment rate**, and **per capita GDP growth rate** in countries with varying degrees of industrialization, specifically Uganda, China, and the United States, from 2001 to 2023?
+
+# 04 Data Visualization and Data Story
+
+## Load Data
+
+```{r}
+data_available_clean <- read_excel("data/available_data.xlsx")
+
+```
+
+## a. Graph 1: Agricultural Employment vs Industrial Employment in industry
+
+```{r}
+
+ggplot(data_available_clean, aes(x = year)) +
+  geom_line(aes(y = empl_agri, color = "Agriculture"), size = 1) +
+  geom_line(aes(y = empl_industry, color = "Industry"), size = 1, linetype = "dashed") +
+  facet_wrap(~ country_name, scales = "free_y") +
+  scale_color_manual(values = c("Agriculture" = "green", "Industry" = "blue")) +
+  labs(title = "Agricultural vs. Industrial Employment (2001-2023)",
+       subtitle = "Comparison of China, US, and Uganda",
+       x = "Year", y = "Employment (%)", color = "Sector") +
+  theme_minimal() +
+    theme(
+    text = element_text(family = "serif")
+  )
+
+```
+
+An increase in industrial employment is associated with a decrease in agricultural employment. As economies industrialize, labor typically shifts from agriculture to industry, reflecting structural transformation.
+
+## b. Graph 2: 
+
+```{r}
+ggplot(data_available_clean, aes(x = empl_industry, y = empl_services, color = country_name)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(values = c("China" = "red", "United States" = "blue", "Uganda" = "green")) +
+  labs(title = "Industry vs. Service Employment",
+       subtitle = "Does Industrialization Drive Service Growth?",
+       x = "Manufacturing Employment (%)",
+       y = "Service Employment (%)",
+       color = "Country") +
+  theme_classic()
+
+```
+
+An increase in industrial employment is associated with a decrease in service sector employment.
+Industrial growth may initially draw labor from the service sector; however, over time, a mature industrial economy often supports an expanding service sector.
+
+
+## c. Graph 3: 
+
+```{r}
+
+
+ggplot(data_available_clean, aes(x = year)) +
+  geom_line(aes(y = unemp_total_milo, color = "Total Unemployment"), size = 1) +
+  geom_line(aes(y = unemp_youth_total_milo, color = "Youth Unemployment"), size = 1, linetype = "dashed") +
+  geom_line(aes(y = unemp_youth_male_milo, color = "Male Youth Unemployment"), size = 1, linetype = "dashed") +
+    geom_line(aes(y = unemp_youth_female_milo, color = "Female Unemployment"), size = 1, linetype = "dashed") +
+  facet_wrap(~ country_name, scales = "free_y") +
+  scale_color_manual(values = c("Total Unemployment" = "red", "Youth Unemployment" = "blue", "Male Youth Unemployment" = "black", "Female Youth Unemployment" = "gray")) +
+  labs(title = "Unemployment Trends and Industrialization",
+       subtitle = "Comparison of China, US, and Uganda",
+       x = "Year", y = "Unemployment Rate (%)", color = "Indicator") +
+  theme_minimal()
+
+
+```
+
+## d. Graph 4: 
+
+```{r}
+
+ggplot(data_available_clean, aes(x = empl_industry, y = gdp_per_person_employed, 
+                                 color = country_name, shape = country_code)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(values = c("China" = "blue", "United States" = "red", "Uganda" = "green")) +
+  labs(title = "Manufacturing Employment vs. GDP per Capita",
+       subtitle = "Does Industrialization Boost Economic Growth?",
+       x = "Manufacturing Employment (%)",
+       y = "GDP per Capita Growth (%)",
+       color = "Country", shape = "Country") +
+  theme_minimal() +
+  facet_wrap(~ country_code)
+
+
+```
+
+
+```{r}
+
+
+ggplot(data_available_clean, aes(x = year)) +
+  geom_line(aes(y = self_employed_total, color = "Self Employment"), size = 1) +
+  geom_line(aes(y = vulnerable_emp_total, color = "Vulnerable Employment"), size = 1, linetype = "dashed") +
+  facet_wrap(~ country_name, scales = "free_y") +
+  scale_color_manual(values = c("Self Employment" = "red", "Vulnerable Employment" = "blue")) +
+  labs(title = "Unemployment Trends and Industrialization",
+       subtitle = "Comparison of China, US, and Uganda",
+       x = "Year", y = "Unemployment Rate (%)", color = "Indicator") +
+  theme_minimal()
+
+
+ggplot(data_available_clean, aes(x = year)) +
+  geom_line(aes(y = gross_capital_growth, color = "gross_capital_growth"), size = 1) +
+  facet_wrap(~ country_name, scales = "free_y") +
+  scale_color_manual(values = c("gross_capital_growth" = "red")) +
+  labs(title = "Unemployment Trends and Industrialization",
+       subtitle = "Comparison of China, US, and Uganda",
+       x = "Year", y = "Unemployment Rate (%)", color = "Indicator") +
+  theme_minimal()
+
+```
+
+
+
+# Appendix: Clean Data
+
+## 01 Transfer the Data Format
 
 ```{r}
 # Read Original File and Assign it to "data" 
@@ -63,6 +198,8 @@ data_clean <- data_long |>
 
 Here, we delete the "Series Code" column, because all the values in it have corresponding value in column "Series Name". If we don't delete it, all values of the variables would be misaligned and lots of blank rows when pivot_wider using "Series Name".
 
+## 02 Save the Preliminary Data Set
+
 ```{r}
 # Save the data as an Excel file
 
@@ -70,11 +207,15 @@ Here, we delete the "Series Code" column, because all the values in it have corr
 
 ```
 
-## Select and Rename Data with Few NAs
+## 03 Select and Rename Data with Few NAs
 
-After taking a glimpse of *world_bank_data_clean.xlsx*, we selected the variables with few NAs manually and renamed them in R:
+After taking a glimpse of *world_bank_data_clean.xlsx*, we selected the variables with few NAs manually and renamed them in R.
+
+*Click toggle to fold it*
 
 ```{r}
+#| code-fold: show
+
 # Define short names for selected variables
 data_available <- data_clean %>%
   select(
@@ -204,17 +345,31 @@ data_available <- data_clean %>%
 
 ```
 
-Use **glimpse(data_available)** to see our new dataset. Now our problem is all variables that should be numeric are strings.
+Now, if we use **glimpse(data_available)** to see our new dataset, we'll find that all variables that should be numeric are strings. So next step, we need adjust our variables' data type.
+
+## 04 Adjust the Data Type and Save Final Data Set
 
 ```{r}
 # Mutate the chr into numeric
+
 data_available_clean <- data_available |> 
   mutate(across(-c(country_name, country_code, year), as.numeric))
+  # cut out the first three columns and transfer the rest
+
+
+# Save final data set as Excel file to analyze
+
+# write_xlsx(data_available_clean, "data/available_data.xlsx")
+
 
 ```
-Create Codebook
+
+## 05 Create and Save a Codebook File for Our Data
+
+*Click toggle to fold it*
 
 ```{r}
+#| code-fold: show
 
 codebook <- tribble(
   ~new_variable,                    ~original_variable,                                                    
@@ -344,54 +499,9 @@ codebook <- tribble(
 
 
 # Write the updated codebook to an Excel file
+
 # write_xlsx(codebook, "data/3_codebook_availabledata.xlsx")
 
-
-
 ```
 
-
-
-```{r}
-ggplot(data = data_available_clean, mapping = aes(x = year, y = lfpr_total_15_64_milo)) +
-  geom_line()+
-  facet_wrap(~country_name)
-
-
-ggplot(data = data_available_clean, mapping = aes(x = year, y = gdp_growth)) +
-  geom_line()+
-  facet_wrap(~country_name)
-
-
-ggplot(data = data_available_clean, mapping = aes(x = lfpr_total_15_64_milo, y = gdp_growth)) +
-  geom_point()+
-  facet_wrap(~country_name)
-
-ggplot(data = data_available_clean, mapping = aes(x = year, y = lfpr_total_15_64_milo)) +
-  geom_line()+
-  facet_wrap(~country_name)
-
-ggplot(data = data_available_clean, mapping = aes(x = year, y = final_cons_growth)) +
-  geom_line()+
-  facet_wrap(~country_name)
-
-
-ggplot(data = data_available_clean, mapping = aes(x = lfpr_total_15_64_milo, y = final_cons_growth)) +
-  geom_line()+
-  facet_wrap(~country_name)
-
-
-
-ggplot(data = data_available_clean, mapping = aes(x = year, y = changes_inventories)) +
-  geom_line()+
-  facet_wrap(~country_name)
-
-
-data_available_clean |>
-  
-ggplot(mapping = aes(x = year, y = cfw_total)) +
-  geom_line()+
-  facet_wrap(~country_name)
-
-
-```
+Up to this step, we have the most important three files we need for data analysis —— *available_data.xlsx*, *2_Metadata_World_Development_Indicators.xlsx* and *3_codebook_availabledata.xlsx*. Go back to the **Research Question** part and finish data visualization and analysis.
