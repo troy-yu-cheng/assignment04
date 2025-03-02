@@ -3,7 +3,8 @@
 .RData
 .Ruserdata
 
-*.dta
+*.xlsx
+*.dta                                              
 
 # History files
 .Rhistory
