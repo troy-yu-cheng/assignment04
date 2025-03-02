@@ -32,11 +32,11 @@ library(tidyverse)
 
 ```
 
-As the process of data cleaning is too complicated, we made it as an appendix. You can follow the code in **Appendix** and reproduce the cleaned data set we use here.
+As the process of data cleaning was too complicated, we made it as an appendix. You can follow the code in **Appendix** and reproduce the cleaned data set we use here.
 
 # 03 Research Question
 
-Industrialization is a key indicator of a country's development level. The differences of the industrialization level in different countries intrigue the question: how does the **employment rate in the industrial sector**, *which includes mining and quarrying, manufacturing, construction, and public utilities (electricity, gas, and water)*, relate to the **industrial structure** (agriculture and services), **youth unemployment rate**, and **per capita GDP growth rate** in countries with varying degrees of industrialization, specifically Uganda, China, and the United States, from 2001 to 2023?
+Industrialization is a key indicator of a country's development level. The differences of the industrialization level in different countries intrigue the question: how does the **employment rate in the industrial sector**, *which includes mining and quarrying, manufacturing, construction, and public utilities (electricity, gas, and water)*, relate to the **industrial structure** (agriculture and services), **youth unemployment rate**, and **per capita GDP growth rate** in countries with varying degrees of industrialization, specifically Uganda, China, and the United States, from 2001 to 2023? Is there any characteristic or pattern that we can extract?
 
 # 04 Data Visualization and Data Story
 
@@ -47,114 +47,96 @@ data_available_clean <- read_excel("data/available_data.xlsx")
 
 ```
 
-## a. Graph 1: Agricultural Employment vs Industrial Employment in industry
+## a. Graph 1: Trends of Agricultural and Industrial Employment Rate in Three Countries
 
 ```{r}
 
 ggplot(data_available_clean, aes(x = year)) +
   geom_line(aes(y = empl_agri, color = "Agriculture"), size = 1) +
-  geom_line(aes(y = empl_industry, color = "Industry"), size = 1, linetype = "dashed") +
-  facet_wrap(~ country_name, scales = "free_y") +
-  scale_color_manual(values = c("Agriculture" = "green", "Industry" = "blue")) +
-  labs(title = "Agricultural vs. Industrial Employment (2001-2023)",
-       subtitle = "Comparison of China, US, and Uganda",
-       x = "Year", y = "Employment (%)", color = "Sector") +
-  theme_minimal() +
+  geom_line(aes(y = empl_industry, color = "Industry"), size = 1) +
+  facet_wrap(~ country_name) +
+  scale_color_manual(values = c("Agriculture" = "green", "Industry" = "red")) +
+  labs(
+    title = "Agricultural vs. Industrial Employment (2001-2023)",
+    subtitle = "Comparison of China, US, and Uganda",
+    x = "Year", 
+    y = "Employment Rate (%)", 
+    color = "Sector"
+       ) +
+  theme_light() +
     theme(
     text = element_text(family = "serif")
   )
 
 ```
+This line chart shows China and Uganda's agricultural employment rate declining over time. China's industrial employment rate steadily rises until around 2015, reflecting a classic structural shift from agriculture to industry during rapid industrialization. Uganda follows a similar downward trend in agricultural employment, but its industrial employment remains stagnant, suggesting a slower transition. The U.S. exhibits minimal changes, as it has already undergone industrialization, with both agricultural and industrial employment stabilizing at low levels. This highlights the ongoing industrialization process in countries like China and Uganda, where labor gradually shifts away from agriculture, but at different paces.
 
-An increase in industrial employment is associated with a decrease in agricultural employment. As economies industrialize, labor typically shifts from agriculture to industry, reflecting structural transformation.
-
-## b. Graph 2: 
+## b. Graph 2: Relationship between Industrial Employment Rate and Service Employment Rate
 
 ```{r}
 ggplot(data_available_clean, aes(x = empl_industry, y = empl_services, color = country_name)) +
   geom_point(size = 3, alpha = 0.7) +
   geom_smooth(method = "lm", se = FALSE) +
   scale_color_manual(values = c("China" = "red", "United States" = "blue", "Uganda" = "green")) +
-  labs(title = "Industry vs. Service Employment",
-       subtitle = "Does Industrialization Drive Service Growth?",
-       x = "Manufacturing Employment (%)",
-       y = "Service Employment (%)",
-       color = "Country") +
-  theme_classic()
+  labs(
+    title = "Industry vs. Service Employment",
+    subtitle = "Does Industrialization Drive Service Growth?",
+    x = "Manufacturing Employment (%)",
+    y = "Service Employment (%)",
+    color = "Country"
+    ) +
+  theme_minimal() +
+    theme(
+    text = element_text(family = "serif"),
+  )
+
 
 ```
 
-An increase in industrial employment is associated with a decrease in service sector employment.
-Industrial growth may initially draw labor from the service sector; however, over time, a mature industrial economy often supports an expanding service sector.
+The scatter plot shows the relationship between manufacturing employment (%) and service employment (%) across China, Uganda, and the United States. China shows a positive correlation, indicating that as manufacturing employment increases, service employment also grows, suggesting an industrialization-driven expansion of the service sector. Uganda follows a similar but lower-scale trend, reflecting its early-stage industrialization. The United States, however, shows a negative correlation, where higher manufacturing employment is associated with lower service employment, consistent with a post-industrial economy shifting toward services. This suggests that industrialization initially supports service sector growth, but at later stages, economies tend to transition toward a service-dominated employment structure.
 
 
-## c. Graph 3: 
+## c. Graph 3: Relationship between Industrial Employment and Youth Unemployment
 
 ```{r}
-
-
-ggplot(data_available_clean, aes(x = year)) +
-  geom_line(aes(y = unemp_total_milo, color = "Total Unemployment"), size = 1) +
-  geom_line(aes(y = unemp_youth_total_milo, color = "Youth Unemployment"), size = 1, linetype = "dashed") +
-  geom_line(aes(y = unemp_youth_male_milo, color = "Male Youth Unemployment"), size = 1, linetype = "dashed") +
-    geom_line(aes(y = unemp_youth_female_milo, color = "Female Unemployment"), size = 1, linetype = "dashed") +
-  facet_wrap(~ country_name, scales = "free_y") +
-  scale_color_manual(values = c("Total Unemployment" = "red", "Youth Unemployment" = "blue", "Male Youth Unemployment" = "black", "Female Youth Unemployment" = "gray")) +
-  labs(title = "Unemployment Trends and Industrialization",
+ggplot(data_available_clean, aes(x = year, y = unemp_youth_total_milo, fill = country_name)) +
+  geom_col() +
+  # scale_fill_manual(values = c("China" = "blue", "United States" = "red", "Uganda" = "green")) +
+  # coord_flip() +
+  labs(title = "Industrial Employment vs. Youth Unemployment",
        subtitle = "Comparison of China, US, and Uganda",
-       x = "Year", y = "Unemployment Rate (%)", color = "Indicator") +
-  theme_minimal()
+       x = "Country", 
+       y = "Youth Unemployment Rate (%)") +
+  theme_classic() +
+  facet_wrap(~ country_name)
 
 
 ```
 
-## d. Graph 4: 
+The bar chart compares youth unemployment rates (%) over time in China, Uganda, and the United States. China's youth unemployment rate has steadily increased, particularly after 2015, despite high industrial employment. Uganda shows a more stable but relatively low youth unemployment rate, suggesting limited industrialization but less disruption in the labor market. The U.S. had the highest youth unemployment spikes around 2010, likely due to the 2008 financial crisis, followed by a decline. The data suggests that higher industrial employment does not always correlate with lower youth unemployment, highlighting structural differences in labor markets across these countries.
+
+## d. Graph 4: Relationship between Industrial Employment Rate and GDP per Capita Growth
 
 ```{r}
 
-ggplot(data_available_clean, aes(x = empl_industry, y = gdp_per_person_employed, 
-                                 color = country_name, shape = country_code)) +
-  geom_point(size = 3) +
-  geom_smooth(method = "lm", se = FALSE) +
-  scale_color_manual(values = c("China" = "blue", "United States" = "red", "Uganda" = "green")) +
+ggplot(data_available_clean, aes(x = empl_industry, y = gdp_percap_growth, fill = country_name)) +
+  geom_boxplot() +
+  # geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(values = c("China" = "red", "United States" = "blue", "Uganda" = "green")) +
   labs(title = "Manufacturing Employment vs. GDP per Capita",
        subtitle = "Does Industrialization Boost Economic Growth?",
        x = "Manufacturing Employment (%)",
        y = "GDP per Capita Growth (%)",
        color = "Country", shape = "Country") +
-  theme_minimal() +
-  facet_wrap(~ country_code)
-
+  theme_classic() 
 
 ```
 
+This box plot shows the relationship between manufacturing employment (%) and GDP per capita growth (%) across China, Uganda, and the United States. China, with the highest manufacturing employment, also has the highest and most variable GDP growth, suggesting strong but fluctuating economic expansion. Uganda has moderate manufacturing employment and steady but lower GDP growth, while the U.S., with lower manufacturing employment, experiences stable but slower growth. The trend suggests that higher manufacturing employment may drive economic growth, particularly in industrializing economies like China.
 
-```{r}
+# 05 Discussion
 
-
-ggplot(data_available_clean, aes(x = year)) +
-  geom_line(aes(y = self_employed_total, color = "Self Employment"), size = 1) +
-  geom_line(aes(y = vulnerable_emp_total, color = "Vulnerable Employment"), size = 1, linetype = "dashed") +
-  facet_wrap(~ country_name, scales = "free_y") +
-  scale_color_manual(values = c("Self Employment" = "red", "Vulnerable Employment" = "blue")) +
-  labs(title = "Unemployment Trends and Industrialization",
-       subtitle = "Comparison of China, US, and Uganda",
-       x = "Year", y = "Unemployment Rate (%)", color = "Indicator") +
-  theme_minimal()
-
-
-ggplot(data_available_clean, aes(x = year)) +
-  geom_line(aes(y = gross_capital_growth, color = "gross_capital_growth"), size = 1) +
-  facet_wrap(~ country_name, scales = "free_y") +
-  scale_color_manual(values = c("gross_capital_growth" = "red")) +
-  labs(title = "Unemployment Trends and Industrialization",
-       subtitle = "Comparison of China, US, and Uganda",
-       x = "Year", y = "Unemployment Rate (%)", color = "Indicator") +
-  theme_minimal()
-
-```
-
-
+Developing countries should focus on growing their manufacturing sector to boost GDP and reduce youth unemployment. Investing in infrastructure, education, and industrial innovation can help create stable jobs. As economies grow, a smooth shift to the service sector is needed to maintain long-term stability. Policymakers must balance industrial growth with job creation to avoid unemployment spikes.
 
 # Appendix: Clean Data
 
