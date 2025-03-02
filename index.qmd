@@ -1,0 +1,489 @@
+---
+title: "Data Science for Public Policy"
+subtitle: "Assignment 04"
+author: 
+  - name: "Troy Cheng - yc1317, Caroline Atuhaire - ca975"
+    email: yc1317@georgetown.edu
+    affiliation: Georgetown University
+    corresponding: true
+execute:
+  warning: false
+df-print: kable
+title-block-banner: "#E69F0095"
+title-block-banner-color: "white"
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc-location: left
+---
+# 01 Data Source
+
+[World Development Indicators](https://databank.worldbank.org/source/world-development-indicators) from World Bank
+
+# 02 Set Up Packages
+
+```{r}
+# install.packages(c("readxl", "writexl")
+
+library(readxl)
+library(writexl)
+library(tidyverse)
+
+```
+
+As the process of data cleaning was too complicated, we made it as an appendix. You can follow the code in **Appendix** and reproduce the cleaned data set we use here.
+
+# 03 Research Question
+
+Industrialization is a key indicator of a country's development level. The differences of the industrialization level in different countries intrigue the question: how does the **employment rate in the industrial sector**, *which includes mining and quarrying, manufacturing, construction, and public utilities (electricity, gas, and water)*, relate to the **industrial structure** (agriculture and services), **youth unemployment rate**, and **per capita GDP growth rate** in countries with varying degrees of industrialization, specifically Uganda, China, and the United States, from 2001 to 2023? Is there any characteristic or pattern that we can extract?
+
+# 04 Data Visualization and Data Story
+
+## Load Data
+
+```{r}
+data_available_clean <- read_excel("data/available_data.xlsx")
+
+```
+
+## a. Graph 1: Trends of Agricultural and Industrial Employment Rate in Three Countries
+
+```{r}
+
+ggplot(data_available_clean, aes(x = year)) +
+  geom_line(aes(y = empl_agri, color = "Agriculture"), size = 1) +
+  geom_line(aes(y = empl_industry, color = "Industry"), size = 1) +
+  facet_wrap(~ country_name) +
+  scale_color_manual(values = c("Agriculture" = "green", "Industry" = "red")) +
+  labs(
+    title = "Agricultural vs. Industrial Employment (2001-2023)",
+    subtitle = "Comparison of China, US, and Uganda",
+    x = "Year", 
+    y = "Employment Rate (%)", 
+    color = "Sector"
+       ) +
+  theme_light() +
+    theme(
+    text = element_text(family = "serif")
+  )
+
+```
+This line chart shows China and Uganda's agricultural employment rate declining over time. China's industrial employment rate steadily rises until around 2015, reflecting a classic structural shift from agriculture to industry during rapid industrialization. Uganda follows a similar downward trend in agricultural employment, but its industrial employment remains stagnant, suggesting a slower transition. The U.S. exhibits minimal changes, as it has already undergone industrialization, with both agricultural and industrial employment stabilizing at low levels. This highlights the ongoing industrialization process in countries like China and Uganda, where labor gradually shifts away from agriculture, but at different paces.
+
+## b. Graph 2: Relationship between Industrial Employment Rate and Service Employment Rate
+
+```{r}
+ggplot(data_available_clean, aes(x = empl_industry, y = empl_services, color = country_name)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(values = c("China" = "red", "United States" = "blue", "Uganda" = "green")) +
+  labs(
+    title = "Industry vs. Service Employment",
+    subtitle = "Does Industrialization Drive Service Growth?",
+    x = "Manufacturing Employment (%)",
+    y = "Service Employment (%)",
+    color = "Country"
+    ) +
+  theme_minimal() +
+    theme(
+    text = element_text(family = "serif"),
+  )
+
+
+```
+
+The scatter plot shows the relationship between manufacturing employment (%) and service employment (%) across China, Uganda, and the United States. China shows a positive correlation, indicating that as manufacturing employment increases, service employment also grows, suggesting an industrialization-driven expansion of the service sector. Uganda follows a similar but lower-scale trend, reflecting its early-stage industrialization. The United States, however, shows a negative correlation, where higher manufacturing employment is associated with lower service employment, consistent with a post-industrial economy shifting toward services. This suggests that industrialization initially supports service sector growth, but at later stages, economies tend to transition toward a service-dominated employment structure.
+
+
+## c. Graph 3: Relationship between Industrial Employment and Youth Unemployment
+
+```{r}
+ggplot(data_available_clean, aes(x = year, y = unemp_youth_total_milo, fill = country_name)) +
+  geom_col() +
+  # scale_fill_manual(values = c("China" = "blue", "United States" = "red", "Uganda" = "green")) +
+  # coord_flip() +
+  labs(title = "Industrial Employment vs. Youth Unemployment",
+       subtitle = "Comparison of China, US, and Uganda",
+       x = "Country", 
+       y = "Youth Unemployment Rate (%)") +
+  theme_classic() +
+  facet_wrap(~ country_name)
+
+
+```
+
+The bar chart compares youth unemployment rates (%) over time in China, Uganda, and the United States. China's youth unemployment rate has steadily increased, particularly after 2015, despite high industrial employment. Uganda shows a more stable but relatively low youth unemployment rate, suggesting limited industrialization but less disruption in the labor market. The U.S. had the highest youth unemployment spikes around 2010, likely due to the 2008 financial crisis, followed by a decline. The data suggests that higher industrial employment does not always correlate with lower youth unemployment, highlighting structural differences in labor markets across these countries.
+
+## d. Graph 4: Relationship between Industrial Employment Rate and GDP per Capita Growth
+
+```{r}
+
+ggplot(data_available_clean, aes(x = empl_industry, y = gdp_percap_growth, fill = country_name)) +
+  geom_boxplot() +
+  # geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(values = c("China" = "red", "United States" = "blue", "Uganda" = "green")) +
+  labs(title = "Manufacturing Employment vs. GDP per Capita",
+       subtitle = "Does Industrialization Boost Economic Growth?",
+       x = "Manufacturing Employment (%)",
+       y = "GDP per Capita Growth (%)",
+       color = "Country", shape = "Country") +
+  theme_classic() 
+
+```
+
+This box plot shows the relationship between manufacturing employment (%) and GDP per capita growth (%) across China, Uganda, and the United States. China, with the highest manufacturing employment, also has the highest and most variable GDP growth, suggesting strong but fluctuating economic expansion. Uganda has moderate manufacturing employment and steady but lower GDP growth, while the U.S., with lower manufacturing employment, experiences stable but slower growth. The trend suggests that higher manufacturing employment may drive economic growth, particularly in industrializing economies like China.
+
+# 05 Discussion
+
+Developing countries should focus on growing their manufacturing sector to boost GDP and reduce youth unemployment. Investing in infrastructure, education, and industrial innovation can help create stable jobs. As economies grow, a smooth shift to the service sector is needed to maintain long-term stability. Policymakers must balance industrial growth with job creation to avoid unemployment spikes.
+
+# Appendix: Clean Data
+
+## 01 Transfer the Data Format
+
+```{r}
+# Read Original File and Assign it to "data" 
+
+data <- read_excel("data/0_OriginData_World_Development_Indicators.xlsx")
+
+# Pivot longer to convert year columns into a "Year" column
+
+data_long <- data |>
+  pivot_longer(
+    cols = starts_with("20"), 
+    # Select all year columns (2001-2023)
+    names_to = "Year",          
+    # Move column names to "Year"
+    values_to = "Value"
+    # Store data values in "Value"
+    )        
+
+# Drop NAs contained by these cols
+
+data_long <- data_long |>
+  drop_na(`Country Name`, `Country Code`, `Series Code`, `Series Name`)
+
+# Convert Year column to numeric
+
+data_long$Year <- as.numeric(str_extract(data_long$Year, "\\d+"))
+
+# Pivot wider to make Series Name values into separate columns
+
+data_clean <- data_long |>
+  select(-"Series Code") |>
+  # delete the "Series Code" column
+  pivot_wider(names_from = "Series Name", 
+              values_from = "Value")
+
+```
+
+Here, we delete the "Series Code" column, because all the values in it have corresponding value in column "Series Name". If we don't delete it, all values of the variables would be misaligned and lots of blank rows when pivot_wider using "Series Name".
+
+## 02 Save the Preliminary Data Set
+
+```{r}
+# Save the data as an Excel file
+
+# write_xlsx(data_clean, "data/1_world_bank_data_clean.xlsx")
+
+```
+
+## 03 Select and Rename Data with Few NAs
+
+After taking a glimpse of *world_bank_data_clean.xlsx*, we selected the variables with few NAs manually and renamed them in R.
+
+*Click toggle to fold it*
+
+```{r}
+#| code-fold: show
+
+# Define short names for selected variables
+data_available <- data_clean %>%
+  select(
+    country_name                = `Country Name`,
+    country_code                = `Country Code`,
+    year                        = `Year`,
+    changes_inventories         = `Changes in inventories (constant LCU)`,
+    cfw_female                  = `Contributing family workers, female (% of female employment) (modeled ILO estimate)`,
+    cfw_male                    = `Contributing family workers, male (% of male employment) (modeled ILO estimate)`,
+    cfw_total                   = `Contributing family workers, total (% of total employment) (modeled ILO estimate)`,
+    employers_female            = `Employers, female (% of female employment) (modeled ILO estimate)`,
+    employers_male              = `Employers, male (% of male employment) (modeled ILO estimate)`,
+    employers_total             = `Employers, total (% of total employment) (modeled ILO estimate)`,
+    empl_agri                 = `Employment in agriculture (% of total employment) (modeled ILO estimate)`,
+    empl_agri_female          = `Employment in agriculture, female (% of female employment) (modeled ILO estimate)`,
+    empl_agri_male            = `Employment in agriculture, male (% of male employment) (modeled ILO estimate)`,
+    empl_industry             = `Employment in industry (% of total employment) (modeled ILO estimate)`,
+    empl_industry_female      = `Employment in industry, female (% of female employment) (modeled ILO estimate)`,
+    empl_industry_male        = `Employment in industry, male (% of male employment) (modeled ILO estimate)`,
+    empl_services             = `Employment in services (% of total employment) (modeled ILO estimate)`,
+    empl_services_female      = `Employment in services, female (% of female employment) (modeled ILO estimate)`,
+    empl_services_male        = `Employment in services, male (% of male employment) (modeled ILO estimate)`,
+    emp_pop_15plus_female_milo  = `Employment to population ratio, 15+, female (%) (modeled ILO estimate)`,
+    emp_pop_15plus_female_nat   = `Employment to population ratio, 15+, female (%) (national estimate)`,
+    emp_pop_15plus_male_milo    = `Employment to population ratio, 15+, male (%) (modeled ILO estimate)`,
+    emp_pop_15plus_male_nat     = `Employment to population ratio, 15+, male (%) (national estimate)`,
+    emp_pop_15plus_total_milo   = `Employment to population ratio, 15+, total (%) (modeled ILO estimate)`,
+    emp_pop_15plus_total_nat    = `Employment to population ratio, 15+, total (%) (national estimate)`,
+    emp_pop_15_24_female_milo   = `Employment to population ratio, ages 15-24, female (%) (modeled ILO estimate)`,
+    emp_pop_15_24_female_nat    = `Employment to population ratio, ages 15-24, female (%) (national estimate)`,
+    emp_pop_15_24_male_milo     = `Employment to population ratio, ages 15-24, male (%) (modeled ILO estimate)`,
+    emp_pop_15_24_male_nat      = `Employment to population ratio, ages 15-24, male (%) (national estimate)`,
+    emp_pop_15_24_total_milo    = `Employment to population ratio, ages 15-24, total (%) (modeled ILO estimate)`,
+    emp_pop_15_24_total_nat     = `Employment to population ratio, ages 15-24, total (%) (national estimate)`,
+    exports_growth              = `Exports of goods and services (annual % growth)`,
+    exports_const               = `Exports of goods and services (constant LCU)`,
+    final_cons_growth           = `Final consumption expenditure (annual % growth)`,
+    final_cons_const            = `Final consumption expenditure (constant LCU)`,
+    gdp_const                   = `GDP (constant LCU)`,
+    gdp_growth                  = `GDP growth (annual %)`,
+    gdp_percap_const            = `GDP per capita (constant LCU)`,
+    gdp_percap_growth           = `GDP per capita growth (annual %)`,
+    gdp_per_person_employed     = `GDP per person employed (constant 2021 PPP $)`,
+    gov_final_cons_growth       = `General government final consumption expenditure (annual % growth)`,
+    gov_final_cons_const        = `General government final consumption expenditure (constant LCU)`,
+    gni_const                   = `GNI (constant LCU)`,
+    gni_growth                  = `GNI growth (annual %)`,
+    gni_percap_const            = `GNI per capita (constant LCU)`,
+    gni_percap_growth           = `GNI per capita growth (annual %)`,
+    gov_exp_edu_pct_gdp         = `Government expenditure on education, total (% of GDP)`,
+    gov_exp_edu_pct_gov         = `Government expenditure on education, total (% of government expenditure)`,
+    gross_capital_growth        = `Gross capital formation (annual % growth)`,
+    gross_capital_const         = `Gross capital formation (constant LCU)`,
+    gross_fixed_capital_growth  = `Gross fixed capital formation (annual % growth)`,
+    gross_fixed_capital_const   = `Gross fixed capital formation (constant LCU)`,
+    gross_national_expenditure  = `Gross national expenditure (constant LCU)`,
+    households_cons_growth      = `Households and NPISHs Final consumption expenditure (annual % growth)`,
+    households_cons_const       = `Households and NPISHs Final consumption expenditure (constant LCU)`,
+    households_cons_percap_growth = `Households and NPISHs Final consumption expenditure per capita growth (annual %)`,
+    imports_growth              = `Imports of goods and services (annual % growth)`,
+    imports_const               = `Imports of goods and services (constant LCU)`,
+    lfpr_15_24_female_milo      = `Labor force participation rate for ages 15-24, female (%) (modeled ILO estimate)`,
+    lfpr_15_24_female_nat       = `Labor force participation rate for ages 15-24, female (%) (national estimate)`,
+    lfpr_15_24_male_milo        = `Labor force participation rate for ages 15-24, male (%) (modeled ILO estimate)`,
+    lfpr_15_24_male_nat         = `Labor force participation rate for ages 15-24, male (%) (national estimate)`,
+    lfpr_15_24_total_milo       = `Labor force participation rate for ages 15-24, total (%) (modeled ILO estimate)`,
+    lfpr_15_24_total_nat        = `Labor force participation rate for ages 15-24, total (%) (national estimate)`,
+    lfpr_female_15plus_milo      = `Labor force participation rate, female (% of female population ages 15+) (modeled ILO estimate)`,
+    lfpr_female_15plus_nat       = `Labor force participation rate, female (% of female population ages 15+) (national estimate)`,
+    lfpr_female_15_64_milo       = `Labor force participation rate, female (% of female population ages 15-64) (modeled ILO estimate)`,
+    lfpr_male_15plus_milo        = `Labor force participation rate, male (% of male population ages 15+) (modeled ILO estimate)`,
+    lfpr_male_15plus_nat         = `Labor force participation rate, male (% of male population ages 15+) (national estimate)`,
+    lfpr_male_15_64_milo         = `Labor force participation rate, male (% of male population ages 15-64) (modeled ILO estimate)`,
+    lfpr_total_15plus_milo       = `Labor force participation rate, total (% of total population ages 15+) (modeled ILO estimate)`,
+    lfpr_total_15plus_nat        = `Labor force participation rate, total (% of total population ages 15+) (national estimate)`,
+    lfpr_total_15_64_milo        = `Labor force participation rate, total (% of total population ages 15-64) (modeled ILO estimate)`,
+    lf_adv_edu_total            = `Labor force with advanced education (% of total working-age population with advanced education)`,
+    lf_adv_edu_female           = `Labor force with advanced education, female (% of female working-age population with advanced education)`,
+    lf_adv_edu_male             = `Labor force with advanced education, male (% of male working-age population with advanced education)`,
+    lf_basic_edu_total          = `Labor force with basic education (% of total working-age population with basic education)`,
+    lf_basic_edu_female         = `Labor force with basic education, female (% of female working-age population with basic education)`,
+    lf_basic_edu_male           = `Labor force with basic education, male (% of male working-age population with basic education)`,
+    lf_intermediate_edu_total   = `Labor force with intermediate education (% of total working-age population with intermediate education)`,
+    lf_intermediate_edu_female  = `Labor force with intermediate education, female (% of female working-age population with intermediate education)`,
+    lf_intermediate_edu_male    = `Labor force with intermediate education, male (% of male working-age population with intermediate education)`,
+    labor_female_pct            = `Labor force, female (% of total labor force)`,
+    labor_total                 = `Labor force, total`,
+    part_time_female            = `Part time employment, female (% of total female employment)`,
+    part_time_male              = `Part time employment, male (% of total male employment)`,
+    part_time_total             = `Part time employment, total (% of total employment)`,
+    ratio_lfpr_female_male_milo = `Ratio of female to male labor force participation rate (%) (modeled ILO estimate)`,
+    ratio_lfpr_female_male_nat  = `Ratio of female to male labor force participation rate (%) (national estimate)`,
+    self_employed_female        = `Self-employed, female (% of female employment) (modeled ILO estimate)`,
+    self_employed_male          = `Self-employed, male (% of male employment) (modeled ILO estimate)`,
+    self_employed_total         = `Self-employed, total (% of total employment) (modeled ILO estimate)`,
+    youth_not_in_edu_female     = `Share of youth not in education, employment or training, female (% of female youth population)`,
+    youth_not_in_edu_male       = `Share of youth not in education, employment or training, male (% of male youth population)`,
+    youth_not_in_edu_total      = `Share of youth not in education, employment or training, total (% of youth population)`,
+    unemp_adv_edu_total         = `Unemployment with advanced education (% of total labor force with advanced education)`,
+    unemp_adv_edu_female        = `Unemployment with advanced education, female (% of female labor force with advanced education)`,
+    unemp_adv_edu_male          = `Unemployment with advanced education, male (% of male labor force with advanced education)`,
+    unemp_basic_edu_total       = `Unemployment with basic education (% of total labor force with basic education)`,
+    unemp_basic_edu_female      = `Unemployment with basic education, female (% of female labor force with basic education)`,
+    unemp_basic_edu_male        = `Unemployment with basic education, male (% of male labor force with basic education)`,
+    unemp_inter_edu_total       = `Unemployment with intermediate education (% of total labor force with intermediate education)`,
+    unemp_inter_edu_female      = `Unemployment with intermediate education, female (% of female labor force with intermediate education)`,
+    unemp_inter_edu_male        = `Unemployment with intermediate education, male (% of male labor force with intermediate education)`,
+    unemp_female_milo           = `Unemployment, female (% of female labor force) (modeled ILO estimate)`,
+    unemp_female_nat            = `Unemployment, female (% of female labor force) (national estimate)`,
+    unemp_male_milo             = `Unemployment, male (% of male labor force) (modeled ILO estimate)`,
+    unemp_male_nat              = `Unemployment, male (% of male labor force) (national estimate)`,
+    unemp_total_milo            = `Unemployment, total (% of total labor force) (modeled ILO estimate)`,
+    unemp_total_nat             = `Unemployment, total (% of total labor force) (national estimate)`,
+    unemp_youth_female_milo     = `Unemployment, youth female (% of female labor force ages 15-24) (modeled ILO estimate)`,
+    unemp_youth_female_nat      = `Unemployment, youth female (% of female labor force ages 15-24) (national estimate)`,
+    unemp_youth_male_milo       = `Unemployment, youth male (% of male labor force ages 15-24) (modeled ILO estimate)`,
+    unemp_youth_male_nat        = `Unemployment, youth male (% of male labor force ages 15-24) (national estimate)`,
+    unemp_youth_total_milo      = `Unemployment, youth total (% of total labor force ages 15-24) (modeled ILO estimate)`,
+    unemp_youth_total_nat       = `Unemployment, youth total (% of total labor force ages 15-24) (national estimate)`,
+    vulnerable_emp_female       = `Vulnerable employment, female (% of female employment) (modeled ILO estimate)`,
+    vulnerable_emp_male         = `Vulnerable employment, male (% of male employment) (modeled ILO estimate)`,
+    vulnerable_emp_total        = `Vulnerable employment, total (% of total employment) (modeled ILO estimate)`,
+    wage_workers_female         = `Wage and salaried workers, female (% of female employment) (modeled ILO estimate)`,
+    wage_workers_male           = `Wage and salaried workers, male (% of male employment) (modeled ILO estimate)`,
+    wage_workers_total          = `Wage and salaried workers, total (% of total employment) (modeled ILO estimate)`
+  )
+
+```
+
+Now, if we use **glimpse(data_available)** to see our new dataset, we'll find that all variables that should be numeric are strings. So next step, we need adjust our variables' data type.
+
+## 04 Adjust the Data Type and Save Final Data Set
+
+```{r}
+# Mutate the chr into numeric
+
+data_available_clean <- data_available |> 
+  mutate(across(-c(country_name, country_code, year), as.numeric))
+  # cut out the first three columns and transfer the rest
+
+
+# Save final data set as Excel file to analyze
+
+# write_xlsx(data_available_clean, "data/available_data.xlsx")
+
+
+```
+
+## 05 Create and Save a Codebook File for Our Data
+
+*Click toggle to fold it*
+
+```{r}
+#| code-fold: show
+
+codebook <- tribble(
+  ~new_variable,                    ~original_variable,                                                    
+  "country_name",                   "Country Name",
+  "country_code",                   "Country Code",
+  "year",                           "Year",
+  "changes_inventories",            "Changes in inventories (constant LCU)",
+  "cfw_female",                     "Contributing family workers, female (% of female employment) (modeled ILO estimate)",
+  "cfw_male",                       "Contributing family workers, male (% of male employment) (modeled ILO estimate)",
+  "cfw_total",                      "Contributing family workers, total (% of total employment) (modeled ILO estimate)",
+  "employers_female",               "Employers, female (% of female employment) (modeled ILO estimate)",
+  "employers_male",                 "Employers, male (% of male employment) (modeled ILO estimate)",
+  "employers_total",                "Employers, total (% of total employment) (modeled ILO estimate)",
+  "empl_agri",                      "Employment in agriculture (% of total employment) (modeled ILO estimate)",
+  "empl_agri_female",               "Employment in agriculture, female (% of female employment) (modeled ILO estimate)",
+  "empl_agri_male",                 "Employment in agriculture, male (% of male employment) (modeled ILO estimate)",
+  "empl_industry",                  "Employment in industry (% of total employment) (modeled ILO estimate)",
+  "empl_industry_female",           "Employment in industry, female (% of female employment) (modeled ILO estimate)",
+  "empl_industry_male",             "Employment in industry, male (% of male employment) (modeled ILO estimate)",
+  "empl_services",                  "Employment in services (% of total employment) (modeled ILO estimate)",
+  "empl_services_female",           "Employment in services, female (% of female employment) (modeled ILO estimate)",
+  "empl_services_male",             "Employment in services, male (% of male employment) (modeled ILO estimate)",
+  "emp_pop_15plus_female_milo",     "Employment to population ratio, 15+, female (%) (modeled ILO estimate)",
+  "emp_pop_15plus_female_nat",      "Employment to population ratio, 15+, female (%) (national estimate)",
+  "emp_pop_15plus_male_milo",       "Employment to population ratio, 15+, male (%) (modeled ILO estimate)",
+  "emp_pop_15plus_male_nat",        "Employment to population ratio, 15+, male (%) (national estimate)",
+  "emp_pop_15plus_total_milo",      "Employment to population ratio, 15+, total (%) (modeled ILO estimate)",
+  "emp_pop_15plus_total_nat",       "Employment to population ratio, 15+, total (%) (national estimate)",
+  "emp_pop_15_24_female_milo",      "Employment to population ratio, ages 15-24, female (%) (modeled ILO estimate)",
+  "emp_pop_15_24_female_nat",       "Employment to population ratio, ages 15-24, female (%) (national estimate)",
+  "emp_pop_15_24_male_milo",        "Employment to population ratio, ages 15-24, male (%) (modeled ILO estimate)",
+  "emp_pop_15_24_male_nat",         "Employment to population ratio, ages 15-24, male (%) (national estimate)",
+  "emp_pop_15_24_total_milo",       "Employment to population ratio, ages 15-24, total (%) (modeled ILO estimate)",
+  "emp_pop_15_24_total_nat",        "Employment to population ratio, ages 15-24, total (%) (national estimate)",
+  "exports_growth",                 "Exports of goods and services (annual % growth)",
+  "exports_const",                  "Exports of goods and services (constant LCU)",
+  "final_cons_growth",              "Final consumption expenditure (annual % growth)",
+  "final_cons_const",               "Final consumption expenditure (constant LCU)",
+  "gdp_const",                      "GDP (constant LCU)",
+  "gdp_growth",                     "GDP growth (annual %)",
+  "gdp_percap_const",               "GDP per capita (constant LCU)",
+  "gdp_percap_growth",              "GDP per capita growth (annual %)",
+  "gdp_per_person_employed",        "GDP per person employed (constant 2021 PPP $)",
+  "gov_final_cons_growth",          "General government final consumption expenditure (annual % growth)",
+  "gov_final_cons_const",           "General government final consumption expenditure (constant LCU)",
+  "gni_const",                      "GNI (constant LCU)",
+  "gni_growth",                     "GNI growth (annual %)",
+  "gni_percap_const",               "GNI per capita (constant LCU)",
+  "gni_percap_growth",              "GNI per capita growth (annual %)",
+  "gov_exp_edu_pct_gdp",            "Government expenditure on education, total (% of GDP)",
+  "gov_exp_edu_pct_gov",            "Government expenditure on education, total (% of government expenditure)",
+  "gross_capital_growth",           "Gross capital formation (annual % growth)",
+  "gross_capital_const",            "Gross capital formation (constant LCU)",
+  "gross_fixed_capital_growth",     "Gross fixed capital formation (annual % growth)",
+  "gross_fixed_capital_const",      "Gross fixed capital formation (constant LCU)",
+  "gross_national_expenditure",     "Gross national expenditure (constant LCU)",
+  "households_cons_growth",         "Households and NPISHs Final consumption expenditure (annual % growth)",
+  "households_cons_const",          "Households and NPISHs Final consumption expenditure (constant LCU)",
+  "households_cons_percap_growth",  "Households and NPISHs Final consumption expenditure per capita growth (annual %)",
+  "imports_growth",                 "Imports of goods and services (annual % growth)",
+  "imports_const",                  "Imports of goods and services (constant LCU)",
+  "lfpr_15_24_female_milo",         "Labor force participation rate for ages 15-24, female (%) (modeled ILO estimate)",
+  "lfpr_15_24_female_nat",          "Labor force participation rate for ages 15-24, female (%) (national estimate)",
+  "lfpr_15_24_male_milo",           "Labor force participation rate for ages 15-24, male (%) (modeled ILO estimate)",
+  "lfpr_15_24_male_nat",            "Labor force participation rate for ages 15-24, male (%) (national estimate)",
+  "lfpr_15_24_total_milo",          "Labor force participation rate for ages 15-24, total (%) (modeled ILO estimate)",
+  "lfpr_15_24_total_nat",           "Labor force participation rate for ages 15-24, total (%) (national estimate)",
+  "lfpr_female_15plus_milo",        "Labor force participation rate, female (% of female population ages 15+) (modeled ILO estimate)",
+  "lfpr_female_15plus_nat",         "Labor force participation rate, female (% of female population ages 15+) (national estimate)",
+  "lfpr_female_15_64_milo",         "Labor force participation rate, female (% of female population ages 15-64) (modeled ILO estimate)",
+  "lfpr_male_15plus_milo",          "Labor force participation rate, male (% of male population ages 15+) (modeled ILO estimate)",
+  "lfpr_male_15plus_nat",           "Labor force participation rate, male (% of male population ages 15+) (national estimate)",
+  "lfpr_male_15_64_milo",           "Labor force participation rate, male (% of male population ages 15-64) (modeled ILO estimate)",
+  "lfpr_total_15plus_milo",         "Labor force participation rate, total (% of total population ages 15+) (modeled ILO estimate)",
+  "lfpr_total_15plus_nat",          "Labor force participation rate, total (% of total population ages 15+) (national estimate)",
+  "lfpr_total_15_64_milo",          "Labor force participation rate, total (% of total population ages 15-64) (modeled ILO estimate)",
+  "lf_adv_edu_total",               "Labor force with advanced education (% of total working-age population with advanced education)",
+  "lf_adv_edu_female",              "Labor force with advanced education, female (% of female working-age population with advanced education)",
+  "lf_adv_edu_male",                "Labor force with advanced education, male (% of male working-age population with advanced education)",
+  "lf_basic_edu_total",             "Labor force with basic education (% of total working-age population with basic education)",
+  "lf_basic_edu_female",            "Labor force with basic education, female (% of female working-age population with basic education)",
+  "lf_basic_edu_male",              "Labor force with basic education, male (% of male working-age population with basic education)",
+  "lf_intermediate_edu_total",      "Labor force with intermediate education (% of total working-age population with intermediate education)",
+  "lf_intermediate_edu_female",     "Labor force with intermediate education, female (% of female working-age population with intermediate education)",
+  "lf_intermediate_edu_male",       "Labor force with intermediate education, male (% of male working-age population with intermediate education)",
+  "labor_female_pct",               "Labor force, female (% of total labor force)",
+  "labor_total",                    "Labor force, total",
+  "part_time_female",               "Part time employment, female (% of total female employment)",
+  "part_time_male",                 "Part time employment, male (% of total male employment)",
+  "part_time_total",                "Part time employment, total (% of total employment)",
+  "ratio_lfpr_female_male_milo",     "Ratio of female to male labor force participation rate (%) (modeled ILO estimate)",
+  "ratio_lfpr_female_male_nat",      "Ratio of female to male labor force participation rate (%) (national estimate)",
+  "self_employed_female",           "Self-employed, female (% of female employment) (modeled ILO estimate)",
+  "self_employed_male",             "Self-employed, male (% of male employment) (modeled ILO estimate)",
+  "self_employed_total",            "Self-employed, total (% of total employment) (modeled ILO estimate)",
+  "youth_not_in_edu_female",        "Share of youth not in education, employment or training, female (% of female youth population)",
+  "youth_not_in_edu_male",          "Share of youth not in education, employment or training, male (% of male youth population)",
+  "youth_not_in_edu_total",         "Share of youth not in education, employment or training, total (% of youth population)",
+  "unemp_adv_edu_total",            "Unemployment with advanced education (% of total labor force with advanced education)",
+  "unemp_adv_edu_female",           "Unemployment with advanced education, female (% of female labor force with advanced education)",
+  "unemp_adv_edu_male",             "Unemployment with advanced education, male (% of male labor force with advanced education)",
+  "unemp_basic_edu_total",          "Unemployment with basic education (% of total labor force with basic education)",
+  "unemp_basic_edu_female",         "Unemployment with basic education, female (% of female labor force with basic education)",
+  "unemp_basic_edu_male",           "Unemployment with basic education, male (% of male labor force with basic education)",
+  "unemp_inter_edu_total",          "Unemployment with intermediate education (% of total labor force with intermediate education)",
+  "unemp_inter_edu_female",         "Unemployment with intermediate education, female (% of female labor force with intermediate education)",
+  "unemp_inter_edu_male",           "Unemployment with intermediate education, male (% of male labor force with intermediate education)",
+  "unemp_female_milo",              "Unemployment, female (% of female labor force) (modeled ILO estimate)",
+  "unemp_female_nat",               "Unemployment, female (% of female labor force) (national estimate)",
+  "unemp_male_milo",                "Unemployment, male (% of male labor force) (modeled ILO estimate)",
+  "unemp_male_nat",                 "Unemployment, male (% of male labor force) (national estimate)",
+  "unemp_total_milo",               "Unemployment, total (% of total labor force) (modeled ILO estimate)",
+  "unemp_total_nat",                "Unemployment, total (% of total labor force) (national estimate)",
+  "unemp_youth_female_milo",        "Unemployment, youth female (% of female labor force ages 15-24) (modeled ILO estimate)",
+  "unemp_youth_female_nat",         "Unemployment, youth female (% of female labor force ages 15-24) (national estimate)",
+  "unemp_youth_male_milo",          "Unemployment, youth male (% of male labor force ages 15-24) (modeled ILO estimate)",
+  "unemp_youth_male_nat",           "Unemployment, youth male (% of male labor force ages 15-24) (national estimate)",
+  "unemp_youth_total_milo",         "Unemployment, youth total (% of total labor force ages 15-24) (modeled ILO estimate)",
+  "unemp_youth_total_nat",          "Unemployment, youth total (% of total labor force ages 15-24) (national estimate)",
+  "vulnerable_emp_female",          "Vulnerable employment, female (% of female employment) (modeled ILO estimate)",
+  "vulnerable_emp_male",            "Vulnerable employment, male (% of male employment) (modeled ILO estimate)",
+  "vulnerable_emp_total",           "Vulnerable employment, total (% of total employment) (modeled ILO estimate)",
+  "wage_workers_female",            "Wage and salaried workers, female (% of female employment) (modeled ILO estimate)",
+  "wage_workers_male",              "Wage and salaried workers, male (% of male employment) (modeled ILO estimate)",
+  "wage_workers_total",             "Wage and salaried workers, total (% of total employment) (modeled ILO estimate)",
+)
+
+
+# Write the updated codebook to an Excel file
+
+# write_xlsx(codebook, "data/3_codebook_availabledata.xlsx")
+
+```
+
+Up to this step, we have the most important three files we need for data analysis —— *available_data.xlsx*, *2_Metadata_World_Development_Indicators.xlsx* and *3_codebook_availabledata.xlsx*. Go back to the **Research Question** part and finish data visualization and analysis.
