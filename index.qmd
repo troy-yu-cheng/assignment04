@@ -2,14 +2,14 @@
 title: "Data Science for Public Policy"
 subtitle: "Assignment 04"
 author: 
-  - name: "Troy Cheng - yc1317, Caroline Atuhaire - ca975"
+  - name: "Caroline Atuhaire - ca975, Troy Cheng - yc1317"
     email: yc1317@georgetown.edu
     affiliation: Georgetown University
     corresponding: true
 execute:
   warning: false
 df-print: kable
-title-block-banner: "#E69F0095"
+title-block-banner: "#66c2a5"
 title-block-banner-color: "white"
 format:
   html:
@@ -34,11 +34,16 @@ library(tidyverse)
 
 As the process of data cleaning was too complicated, we made it as an appendix. You can follow the code in **Appendix** and reproduce the cleaned data set we use here.
 
+
 # 03 Research Question
 
-Industrialization is a key indicator of a country's development level. The differences of the industrialization level in different countries intrigue the question: how does the **employment rate in the industrial sector**, *which includes mining and quarrying, manufacturing, construction, and public utilities (electricity, gas, and water)*, relate to the **industrial structure** (agriculture and services), **youth unemployment rate**, and **per capita GDP growth rate** in countries with varying degrees of industrialization, specifically Uganda, China, and the United States, from 2001 to 2023? Is there any characteristic or pattern that we can extract?
+Economic engagement goes beyond simply having a job —— it depends on who is working, in which sectors, and under what conditions. While labor force participation reflects workforce involvement, sectoral shifts between agriculture, industry, and services reveal deeper economic transformations. This intrigues the question: how does economic engagement —— through labor force participation, sectoral shifts, and wage employment —— shape job stability and household consumption across different economies?
 
-# 04 Data Visualization and Data Story
+As economies move toward service-based employment, the question remains whether this shift creates stable, wage-paid jobs or perpetuates informal labor. Ultimately, for employment to drive economic stability, rising wage employment should lead to higher household consumption. This analysis examines these dynamics across China, Uganda, and the United States from 2001 to 2023, exploring whether economic growth translates into meaningful labor market improvements.
+
+
+# 04 Data Story and Visualization
+
 
 ## Load Data
 
@@ -47,97 +52,175 @@ data_available_clean <- read_excel("data/available_data.xlsx")
 
 ```
 
-## a. Graph 1: Trends of Agricultural and Industrial Employment Rate in Three Countries
+## Graph 1. Trends of Labor Force Participation Rate in Three Countries
+
+Labor force participation serves as a fundamental indicator of economic engagement.
 
 ```{r}
-
-ggplot(data_available_clean, aes(x = year)) +
-  geom_line(aes(y = empl_agri, color = "Agriculture"), size = 1) +
-  geom_line(aes(y = empl_industry, color = "Industry"), size = 1) +
-  facet_wrap(~ country_name) +
-  scale_color_manual(values = c("Agriculture" = "green", "Industry" = "red")) +
+ggplot(data_available_clean, aes(x = year, group = country_name, color = country_name)) +
+  geom_line(aes(y = lfpr_total_15_64_milo), size = 1) +
+  geom_point(aes(y = lfpr_total_15_64_milo), size = 2) +
+  scale_x_continuous(breaks = seq(min(data_available_clean$year), max(data_available_clean$year), by = 2)) +
   labs(
-    title = "Agricultural vs. Industrial Employment (2001-2023)",
-    subtitle = "Comparison of China, US, and Uganda",
+    title = "Trends of Labor Force Participation Rate (2001-2023)",
+    subtitle = "Comparing Workforce Engagement Across Countries",
     x = "Year", 
-    y = "Employment Rate (%)", 
-    color = "Sector"
-       ) +
-  theme_light() +
-    theme(
-    text = element_text(family = "serif")
-  )
-
-```
-This line chart shows China and Uganda's agricultural employment rate declining over time. China's industrial employment rate steadily rises until around 2015, reflecting a classic structural shift from agriculture to industry during rapid industrialization. Uganda follows a similar downward trend in agricultural employment, but its industrial employment remains stagnant, suggesting a slower transition. The U.S. exhibits minimal changes, as it has already undergone industrialization, with both agricultural and industrial employment stabilizing at low levels. This highlights the ongoing industrialization process in countries like China and Uganda, where labor gradually shifts away from agriculture, but at different paces.
-
-## b. Graph 2: Relationship between Industrial Employment Rate and Service Employment Rate
-
-```{r}
-ggplot(data_available_clean, aes(x = empl_industry, y = empl_services, color = country_name)) +
-  geom_point(size = 3, alpha = 0.7) +
-  geom_smooth(method = "lm", se = FALSE) +
-  scale_color_manual(values = c("China" = "red", "United States" = "blue", "Uganda" = "green")) +
-  labs(
-    title = "Industry vs. Service Employment",
-    subtitle = "Does Industrialization Drive Service Growth?",
-    x = "Manufacturing Employment (%)",
-    y = "Service Employment (%)",
-    color = "Country"
-    ) +
+    y = "Labor Force Participation (%)",
+    color = "Country",
+    caption = "Source: The World Bank, World Development Indicators (2025)."
+  ) +
   theme_minimal() +
-    theme(
+  theme(
     text = element_text(family = "serif"),
+    panel.grid = element_blank(),
+    plot.title = element_text(size = 14, face = "bold"),  
+    plot.subtitle = element_text(size = 12, face = "italic"),  
+    axis.title.x = element_text(size = 12),  
+    axis.title.y = element_text(size = 12),  
+    axis.text.x = element_text(size = 12),  
+    axis.text.y = element_text(size = 12),
+    legend.position = "right",
+    axis.line = element_line(color="black")
+)
+```
+
+As shown in the line graph, China's participation rate steadily decreases throughout the period, maintaining a consistent downward trajectory. Uganda exhibits extreme fluctuations, with sharp increases and declines, particularly after 2010, indicating significant variability in workforce engagement. The U.S. saw a decline until 2015, followed by a slight rebound in recent years. The United States shows a gradual decline in labor force participation until around 2016, followed by a slight upward trend. Overall, China and the U.S. exhibit a gradual decline, likely due to aging populations and economic shifts.
+
+## Graph 2. The Structure of Labor Force Participation: Employment Structures Accross Different Sectors 
+
+```{r}
+data_available_clean |>
+  mutate(total_employment = empl_agri + empl_industry + empl_services) |>
+  pivot_longer(cols = c(empl_agri, empl_industry, empl_services),
+               names_to = "sector",
+               values_to = "employment_rate") |>
+  mutate(employment_share = employment_rate / total_employment * 100) |>
+  ggplot(aes(x = year, y = employment_share, fill = sector)) +
+  geom_area(alpha = 0.75) + 
+  facet_wrap(~ country_name) +
+  labs(
+    title = "Change of Sectoral Employment Structure (2001-2023)",
+    subtitle = "Tracking the Shift in Employment Across Agriculture, Industry, and Services",
+    x = "Year", y = "Employment Share (%)",
+    fill = "Sector",
+    caption = "Source: The World Bank, World Development Indicators (2025)."
+  ) +
+  scale_fill_manual(values = c("empl_agri" = "#66c2a5", 
+                               "empl_industry" = "#fc8d62", 
+                               "empl_services" = "#8da0cb"),
+                    labels = c("Agriculture", "Industry", "Services")) + 
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  theme_minimal() +
+  theme(
+    text = element_text(family = "serif"),
+    panel.grid = element_blank(),
+    plot.title = element_text(size = 14, face = "bold"),  
+    plot.subtitle = element_text(size = 12, face = "italic"),  
+    axis.title.x = element_text(size = 12),  
+    axis.title.y = element_text(size = 12),    
+    axis.text.x = element_text(size = 12),  
+    axis.text.y = element_text(size = 12),
+    legend.position = "bottom",
+    axis.line = element_line(color = "black"),
+    legend.key.width = unit(0.8,"cm")
+)
+```
+
+Employment patterns reveal structural transformations in different economies. China's workforce is shifting away from agriculture, with a growing share of employment in industry and services, signifying industrialization. Uganda’s labor market remains heavily dependent on agriculture, with only slow growth in industry and services, indicating limited economic diversification and the characteristics of countries at the early-stage of industrialization. In contrast, the United States is dominated by the service sector, with minimal employment in agriculture and industry, reflecting the maturity of a developed economy and a pattern of post-industrialized country.
+
+
+## Graph 3. The Relationship between Employment Rate in Service and Salaried Workers Employment Rate
+
+As economies shift towards a service-oriented workforce, the question remains: does this growth lead to more stable, wage-paid jobs, or does informal and precarious employment persist?
+
+```{r}
+
+ggplot(data_available_clean, aes(x = empl_services, y = wage_workers_total, color = country_name)) +
+  geom_point(size = 3, alpha = 0.7) + 
+  geom_smooth(method = "lm", se = FALSE, linetype = "dashed", color = "black") + 
+  facet_wrap(~country_name, scales = "free") +
+  labs(
+    title = "As Employment in Services Increases, Salaried Workers Rate Rises",
+    subtitle = "Relationship between Employment Rate in Service and Salaried Workers Employment Rate",
+    x = "Employment in Services (% of Total Employment)", 
+    y = "Salaried Workers (% of Total Employment)",
+    color = "Country",
+    caption = "Source: The World Bank, World Development Indicators (2025)."
+  ) +
+    theme_minimal() +
+  theme(
+    text = element_text(family = "serif"),
+    panel.grid = element_blank(),
+    plot.title = element_text(size = 14, face = "bold"),  
+    plot.subtitle = element_text(size = 12, face = "italic"),  
+    axis.title.x = element_text(size = 12),  
+    axis.title.y = element_text(size = 12),  
+    axis.text.x = element_text(size = 12),  
+    axis.text.y = element_text(size = 12),
+    legend.position = "bottom",
+    axis.line = element_line(color = "black"),  
+    legend.key.width = unit(0.75,"cm")
+)
+
+```
+
+
+The scatter graph shows the relationship between employment in services and the share of salaried workers across China, Uganda, and the United States. In all three countries, a higher share of service employment correlates with a greater proportion of salaried workers, suggesting a shift toward more formal employment. China exhibits a strong positive trend, indicating that service sector growth aligns with stable wage jobs. Uganda shows more variability, suggesting that many service jobs remain informal. The United States has consistently high salaried employment, reinforcing the dominance of formal jobs in a service-driven economy.
+
+
+## Graph 4. Comparing Salaried Workers Employment Rate and Household Consumption Growth Rate Over Time
+
+Even if wage employment rises, its economic impact depends on whether higher job stability translates into increased household spending, reinforcing sustainable economic growth.
+
+```{r}
+data_available_clean |>  
+  select(year, country_name, wage_workers_total, households_cons_growth) |>  
+  pivot_longer(cols = c(wage_workers_total, households_cons_growth),
+               names_to = "Metric",
+               values_to = "Value") |>  
+  mutate(Metric = recode(Metric,
+                         "wage_workers_total" = "Wage Workers (% of Total Employment)",
+                         "households_cons_growth" = "Household Consumption Growth (%)")) |>  
+  ggplot(aes(x = year, y = Value, fill = Metric)) +  
+  geom_col(position = "dodge", alpha = 0.8) +
+  facet_wrap(~country_name) +  
+  scale_fill_manual(values = c("Wage Workers (% of Total Employment)" = "lightblue",
+                               "Household Consumption Growth (%)" = "gold")) +
+  scale_x_continuous(breaks = seq(2001, 2023, by = 2)) +  
+  labs(
+    title = "Wage Employment vs. Household Consumption Growth (2001-2023)",
+    subtitle = "Are Wage-Paid Jobs Driving Higher Household Consumption Growth Rate?",
+    x = "Year",
+    y = "Percentage (%)",
+    fill = "Indicator",
+    caption = "Source: The World Bank, World Development Indicators (2025)."
+  ) +
+  theme_minimal() +
+  theme(
+    text = element_text(family = "serif"),
+    panel.grid = element_blank(),
+    plot.title = element_text(size = 14, face = "bold"),  
+    plot.subtitle = element_text(size = 12, face = "italic"),  
+    axis.title.x = element_text(size = 12),  
+    axis.title.y = element_text(size = 12),  
+    axis.text.x = element_text(size = 10, angle = 45, hjust = 1),  
+    axis.text.y = element_text(size = 12),
+    legend.position = "bottom",
+    axis.line = element_line(color = "black"),  
+    legend.key.width = unit(0.8, "cm")
   )
 
 
 ```
 
-The scatter plot shows the relationship between manufacturing employment (%) and service employment (%) across China, Uganda, and the United States. China shows a positive correlation, indicating that as manufacturing employment increases, service employment also grows, suggesting an industrialization-driven expansion of the service sector. Uganda follows a similar but lower-scale trend, reflecting its early-stage industrialization. The United States, however, shows a negative correlation, where higher manufacturing employment is associated with lower service employment, consistent with a post-industrial economy shifting toward services. This suggests that industrialization initially supports service sector growth, but at later stages, economies tend to transition toward a service-dominated employment structure.
+This bar graph shows whether an increase in wage employment leads to higher household consumption growth rate across China, Uganda, and the United States. China shows a steady rise in wage employment, and household consumption growth remains moderate. Uganda's wage employment is lower and more volatile, with fluctuating consumption growth. The U.S. has consistently high wage employment, yet household consumption growth is relatively stable and low. This suggests that while wage employment may support economic stability, it does not necessarily drive rapid consumption growth in all economies.
+
+## Policy recommendation
+
+Whereas employment in services increases wage workers, it may not necessarily lead to higher household consumption, as shown across the four graphs. In China and Uganda, rising service sector employment has not consistently translated into higher consumption, suggesting that low wages and job instability limit spending power. In contrast, the United States demonstrates that stable wage employment supports sustained consumption growth, highlighting the importance of job quality and fair wages. Therefore, policymakers should ensure wage growth aligns with productivity, strengthen labor protections, and implement policies that boost disposable income to drive household consumption and economic growth.
 
 
-## c. Graph 3: Relationship between Industrial Employment and Youth Unemployment
-
-```{r}
-ggplot(data_available_clean, aes(x = year, y = unemp_youth_total_milo, fill = country_name)) +
-  geom_col() +
-  scale_fill_manual(values = c("China" = "red", "United States" = "blue", "Uganda" = "green")) +
-  labs(title = "Industrial Employment vs. Youth Unemployment",
-       subtitle = "Comparison of China, US, and Uganda",
-       x = "Country", 
-       y = "Youth Unemployment Rate (%)") +
-  theme_classic() +
-  facet_wrap(~ country_name)
-
-
-```
-
-The bar chart compares youth unemployment rates (%) over time in China, Uganda, and the United States. China's youth unemployment rate has steadily increased, particularly after 2015, despite high industrial employment. Uganda shows a more stable but relatively low youth unemployment rate, suggesting limited industrialization but less disruption in the labor market. The U.S. had the highest youth unemployment spikes around 2010, likely due to the 2008 financial crisis, followed by a decline. The data suggests that higher industrial employment does not always correlate with lower youth unemployment, highlighting structural differences in labor markets across these countries.
-
-## d. Graph 4: Relationship between Industrial Employment Rate and GDP per Capita Growth
-
-```{r}
-
-ggplot(data_available_clean, aes(x = empl_industry, y = gdp_percap_growth, fill = country_name)) +
-  geom_boxplot() +
-  # geom_smooth(method = "lm", se = FALSE) +
-  scale_color_manual(values = c("China" = "red", "United States" = "blue", "Uganda" = "green")) +
-  labs(title = "Manufacturing Employment vs. GDP per Capita",
-       subtitle = "Does Industrialization Boost Economic Growth?",
-       x = "Manufacturing Employment (%)",
-       y = "GDP per Capita Growth (%)",
-       color = "Country", shape = "Country") +
-  theme_classic() 
-
-```
-
-This box plot shows the relationship between manufacturing employment (%) and GDP per capita growth (%) across China, Uganda, and the United States. China, with the highest manufacturing employment, also has the highest and most variable GDP growth, suggesting strong but fluctuating economic expansion. Uganda has moderate manufacturing employment and steady but lower GDP growth, while the U.S., with lower manufacturing employment, experiences stable but slower growth. The trend suggests that higher manufacturing employment may drive economic growth, particularly in industrializing economies like China.
-
-# 05 Discussion
-
-Developing countries should focus on growing their manufacturing sector to boost GDP and reduce youth unemployment. Investing in infrastructure, education, and industrial innovation can help create stable jobs. As economies grow, a smooth shift to the service sector is needed to maintain long-term stability. Policymakers must balance industrial growth with job creation to avoid unemployment spikes.
-
-# Appendix: Clean Data
+# Appendix A: Clean Data
 
 ## 01 Transfer the Data Format
 
@@ -486,3 +569,11 @@ codebook <- tribble(
 ```
 
 Up to this step, we have the most important three files we need for data analysis —— *available_data.xlsx*, *2_Metadata_World_Development_Indicators.xlsx* and *3_codebook_availabledata.xlsx*. Go back to the **Research Question** part and finish data visualization and analysis.
+
+# Appendix B: Variables Description
+
+**lfpr_total_15_64_milo**: *the proportion of the population ages 15-64 that is economically active (people who supply labor for the production of goods and services during a specified period)*
+
+**households_cons_growth**: *Annual percentage growth of household and NPISHs final consumption expenditure based on constant local currency. Aggregates are based on constant 2015 prices, expressed in U.S. dollars. Household and NPISHs final consumption expenditure (formerly private consumption) is the market value of all goods and services, including durable products (such as cars, washing machines, and home computers), purchased by households. It excludes purchases of dwellings but includes imputed rent for owner-occupied dwellings. It also includes payments and fees to governments to obtain permits and licenses. This indicator includes the expenditures of nonprofit institutions serving households even when reported separately by the country.*
+
+**wage_workers_total**: *Wage and salaried workers (employees) are those workers who hold the type of jobs defined as "paid employment jobs," where the incumbents hold explicit (written or oral) or implicit employment contracts that give them a basic remuneration that is not directly dependent upon the revenue of the unit for which they work.*
