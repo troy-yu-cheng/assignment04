@@ -37,7 +37,7 @@ As the process of data cleaning was too complicated, we made it as an appendix. 
 
 # 03 Research Question
 
-Economic engagement goes beyond simply having a job —— it depends on who is working, in which sectors, and under what conditions. While labor force participation reflects workforce involvement, sectoral shifts between agriculture, industry, and services reveal deeper economic transformations. This intrigues the question: how does economic engagement —— through labor force participation, sectoral shifts, and wage employment —— shape job stability and household consumption across different economies?
+Economic engagement goes beyond simply having a job. It depends on who is working, in which sectors, and under what conditions. While labor force participation reflects workforce involvement, sectoral shifts between agriculture, industry, and services reveal deeper economic transformations. This intrigues the question: how does economic engagement, *through labor force participation, sectoral shifts, and wage employment*, shape job stability and household consumption across different economies?
 
 As economies move toward service-based employment, the question remains whether this shift creates stable, wage-paid jobs or perpetuates informal labor. Ultimately, for employment to drive economic stability, rising wage employment should lead to higher household consumption. This analysis examines these dynamics across China, Uganda, and the United States from 2001 to 2023, exploring whether economic growth translates into meaningful labor market improvements.
 
@@ -57,7 +57,7 @@ data_available_clean <- read_excel("data/available_data.xlsx")
 Labor force participation serves as a fundamental indicator of economic engagement.
 
 ```{r}
-ggplot(data_available_clean, aes(x = year, group = country_name, color = country_name)) +
+ggplot(data_available_clean, aes(x = year, group = country_name, color = country_name, linetype = "solid")) +
   geom_line(aes(y = lfpr_total_15_64_milo), size = 1) +
   geom_point(aes(y = lfpr_total_15_64_milo), size = 2) +
   scale_x_continuous(breaks = seq(min(data_available_clean$year), max(data_available_clean$year), by = 2)) +
@@ -81,7 +81,8 @@ ggplot(data_available_clean, aes(x = year, group = country_name, color = country
     axis.text.y = element_text(size = 12),
     legend.position = "right",
     axis.line = element_line(color="black")
-)
+) +
+  guides(linetype = "none")
 ```
 
 As shown in the line graph, China's participation rate steadily decreases throughout the period, maintaining a consistent downward trajectory. Uganda exhibits extreme fluctuations, with sharp increases and declines, particularly after 2010, indicating significant variability in workforce engagement. The U.S. saw a decline until 2015, followed by a slight rebound in recent years. The United States shows a gradual decline in labor force participation until around 2016, followed by a slight upward trend. Overall, China and the U.S. exhibit a gradual decline, likely due to aging populations and economic shifts.
@@ -179,16 +180,16 @@ data_available_clean |>
                names_to = "Metric",
                values_to = "Value") |>  
   mutate(Metric = recode(Metric,
-                         "wage_workers_total" = "Wage Workers (% of Total Employment)",
+                         "wage_workers_total" = "Salaried Workers (% of Total Employment)",
                          "households_cons_growth" = "Household Consumption Growth (%)")) |>  
   ggplot(aes(x = year, y = Value, fill = Metric)) +  
   geom_col(position = "dodge", alpha = 0.8) +
   facet_wrap(~country_name) +  
-  scale_fill_manual(values = c("Wage Workers (% of Total Employment)" = "lightblue",
+  scale_fill_manual(values = c("Salaried Workers (% of Total Employment)" = "lightblue",
                                "Household Consumption Growth (%)" = "gold")) +
   scale_x_continuous(breaks = seq(2001, 2023, by = 2)) +  
   labs(
-    title = "Wage Employment vs. Household Consumption Growth (2001-2023)",
+    title = "Salaried Workers Employment vs. Household Consumption Growth (2001-2023)",
     subtitle = "Are Wage-Paid Jobs Driving Higher Household Consumption Growth Rate?",
     x = "Year",
     y = "Percentage (%)",
@@ -215,7 +216,7 @@ data_available_clean |>
 
 This bar graph shows whether an increase in wage employment leads to higher household consumption growth rate across China, Uganda, and the United States. China shows a steady rise in wage employment, and household consumption growth remains moderate. Uganda's wage employment is lower and more volatile, with fluctuating consumption growth. The U.S. has consistently high wage employment, yet household consumption growth is relatively stable and low. This suggests that while wage employment may support economic stability, it does not necessarily drive rapid consumption growth in all economies.
 
-## Policy recommendation
+# 05 Policy recommendation
 
 Whereas employment in services increases wage workers, it may not necessarily lead to higher household consumption, as shown across the four graphs. In China and Uganda, rising service sector employment has not consistently translated into higher consumption, suggesting that low wages and job instability limit spending power. In contrast, the United States demonstrates that stable wage employment supports sustained consumption growth, highlighting the importance of job quality and fair wages. Therefore, policymakers should ensure wage growth aligns with productivity, strengthen labor protections, and implement policies that boost disposable income to drive household consumption and economic growth.
 
@@ -281,7 +282,7 @@ After taking a glimpse of *world_bank_data_clean.xlsx*, we selected the variable
 #| code-fold: show
 
 # Define short names for selected variables
-data_available <- data_clean %>%
+data_available <- data_clean |>
   select(
     country_name                = `Country Name`,
     country_code                = `Country Code`,
@@ -571,6 +572,12 @@ codebook <- tribble(
 Up to this step, we have the most important three files we need for data analysis —— *available_data.xlsx*, *2_Metadata_World_Development_Indicators.xlsx* and *3_codebook_availabledata.xlsx*. Go back to the **Research Question** part and finish data visualization and analysis.
 
 # Appendix B: Variables Description
+
+**empl_agri**: *Employment is defined as persons of working age who were engaged in any activity to produce goods or provide services for pay or profit, whether at work during the reference period or not at work due to temporary absence from a job, or to working-time arrangement. The agriculture sector consists of activities in agriculture, hunting, forestry and fishing, in accordance with division 1 (ISIC 2) or categories A-B (ISIC 3) or category A (ISIC 4).*
+
+**empl_industry**: *Employment is defined as persons of working age who were engaged in any activity to produce goods or provide services for pay or profit, whether at work during the reference period or not at work due to temporary absence from a job, or to working-time arrangement. The industry sector consists of mining and quarrying, manufacturing, construction, and public utilities (electricity, gas, and water), in accordance with divisions 2-5 (ISIC 2) or categories C-F (ISIC 3) or categories B-F (ISIC 4).*
+
+**empl_services**: *Employment is defined as persons of working age who were engaged in any activity to produce goods or provide services for pay or profit, whether at work during the reference period or not at work due to temporary absence from a job, or to working-time arrangement. The services sector consists of wholesale and retail trade and restaurants and hotels; transport, storage, and communications; financing, insurance, real estate, and business services; and community, social, and personal services, in accordance with divisions 6-9 (ISIC 2) or categories G-Q (ISIC 3) or categories G-U (ISIC 4).*
 
 **lfpr_total_15_64_milo**: *the proportion of the population ages 15-64 that is economically active (people who supply labor for the production of goods and services during a specified period)*
 
